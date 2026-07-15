@@ -1,0 +1,17 @@
+{
+  "name": "Offline kalendar veci",
+  "short_name": "Kalendar",
+  "description": "Offline PWA kalendar pre ulohy, fotenie, servis, auto a pripomienky.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f7f4",
+  "theme_color": "#243b53",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

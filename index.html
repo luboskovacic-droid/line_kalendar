@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#243b53">
+  <title>Offline kalendar</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Offline PWA</p>
+        <h1>Kalendar veci</h1>
+      </div>
+      <div class="top-actions">
+        <button id="installBtn" class="icon-button hidden" type="button" title="Instalovat aplikaciu" aria-label="Instalovat aplikaciu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg>
+        </button>
+        <button id="notifyBtn" class="icon-button" type="button" title="Zapnut notifikacie" aria-label="Zapnut notifikacie">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="status-strip" aria-label="Prehlad">
+      <article>
+        <span id="todayCount">0</span>
+        <p>Dnes</p>
+      </article>
+      <article>
+        <span id="soonCount">0</span>
+        <p>Do 7 dni</p>
+      </article>
+      <article>
+        <span id="overdueCount">0</span>
+        <p>Meska</p>
+      </article>
+      <article>
+        <span id="doneCount">0</span>
+        <p>Hotovo</p>
+      </article>
+    </section>
+
+    <main class="layout">
+      <section class="panel task-panel" aria-labelledby="addTitle">
+        <div class="panel-head">
+          <h2 id="addTitle">Pridat zaznam</h2>
+          <button id="seedBtn" class="text-button" type="button">Vlozit priklady</button>
+        </div>
+        <form id="taskForm" class="form-grid">
+          <label>
+            Nazov
+            <input id="titleInput" name="title" autocomplete="off" required placeholder="napr. vymenit olej">
+          </label>
+          <label>
+            Typ
+            <select id="typeInput" name="type">
+              <option value="todo">Uloha</option>
+              <option value="photo">Fotenie</option>
+              <option value="service">Servis</option>
+              <option value="repair">Oprava</option>
+              <option value="trip">Ideme tam</option>
+              <option value="car">Auto</option>
+              <option value="admin">Doklady / platby</option>
+            </select>
+          </label>
+          <label>
+            Datum
+            <input id="dateInput" name="date" type="date" required>
+          </label>
+          <label>
+            Cas upozornenia
+            <input id="timeInput" name="time" type="time" value="08:00">
+          </label>
+          <label class="wide">
+            Poznamka
+            <textarea id="noteInput" name="note" rows="3" placeholder="co treba kupit, kde, komu zavolat..."></textarea>
+          </label>
+          <fieldset class="wide reminder-box">
+            <legend>Pripomenut</legend>
+            <label><input type="checkbox" name="reminders" value="7d" checked> tyzden pred</label>
+            <label><input type="checkbox" name="reminders" value="3d" checked> 3 dni pred</label>
+            <label><input type="checkbox" name="reminders" value="1d" checked> 1 den pred</label>
+            <label><input type="checkbox" name="reminders" value="morning" checked> v dany den rano</label>
+            <label><input type="checkbox" name="reminders" value="custom" checked> vo zvoleny cas</label>
+          </fieldset>
+          <div class="wide form-actions">
+            <button class="primary" type="submit">Ulozit</button>
+            <button id="clearFormBtn" class="secondary" type="button">Vycistit</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="calendarTitle">
+        <div class="panel-head calendar-head">
+          <button id="prevMonth" class="icon-button" type="button" aria-label="Predosly mesiac" title="Predosly mesiac">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <h2 id="calendarTitle">Kalendar</h2>
+          <button id="nextMonth" class="icon-button" type="button" aria-label="Dalsi mesiac" title="Dalsi mesiac">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="weekdays" aria-hidden="true">
+          <span>Po</span><span>Ut</span><span>St</span><span>Stv</span><span>Pi</span><span>So</span><span>Ne</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid" aria-label="Mesacny kalendar"></div>
+      </section>
+    </main>
+
+    <section class="tabs" aria-label="Zoznamy">
+      <button class="tab active" data-tab="upcoming" type="button">Najblizsie</button>
+      <button class="tab" data-tab="car" type="button">Auto</button>
+      <button class="tab" data-tab="done" type="button">Splnene</button>
+    </section>
+
+    <section id="listPanel" class="list-panel" aria-live="polite"></section>
+  </div>
+
+  <template id="taskTemplate">
+    <article class="task-item">
+      <label class="check-wrap">
+        <input class="done-toggle" type="checkbox">
+        <span></span>
+      </label>
+      <div class="task-body">
+        <div class="task-title-row">
+          <h3></h3>
+          <span class="type-pill"></span>
+        </div>
+        <p class="task-meta"></p>
+        <p class="task-note"></p>
+      </div>
+      <div class="task-actions">
+        <button class="icon-button edit-task" type="button" aria-label="Upravit" title="Upravit">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="icon-button delete-task" type="button" aria-label="Vymazat" title="Vymazat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-1 5v6M9 11v6M5 6l1 14h12l1-14"/></svg>
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
